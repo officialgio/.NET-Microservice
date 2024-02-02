@@ -22,9 +22,15 @@ public class ItemsController : ControllerBase
 	}
 
 	[HttpGet("{id}")] // GET /items/{id}
-	public ItemDto? GetById(Guid id)
+	public ActionResult<ItemDto> GetById(Guid id)
 	{
         var item = items.Where(item => item.id == id).SingleOrDefault();
+
+		if (item is null)
+		{
+			return NotFound();
+		}
+
 		return item;
 	}
 
@@ -48,14 +54,20 @@ public class ItemsController : ControllerBase
 	public IActionResult Put(Guid id, UpdateItemDto updateItemDto)
 	{
 		var existingItem = items.Where(item => item.id == id).SingleOrDefault();
-		var updatedItem = existingItem with
+
+        if (existingItem is null)
+        {
+            return NotFound();
+        }
+
+        var updatedItem = existingItem with
 		{
 			Name = updateItemDto.Name,
 			Description = updateItemDto.Description,
 			Price = updateItemDto.Price,
 		};
 
-		var index = items.FindIndex(existingItem => existingItem.id == id);
+        var index = items.FindIndex(existingItem => existingItem.id == id);
 		items[index] = updatedItem;
 
 		return NoContent();
@@ -65,6 +77,12 @@ public class ItemsController : ControllerBase
 	public IActionResult Delete(Guid id)
 	{
 		var index = items.FindIndex(existingItem => existingItem.id == id);
+
+		if (index < 0)
+		{
+			return NotFound(); 
+		}
+
 		items.RemoveAt(index);
 		return NoContent();
 	}
