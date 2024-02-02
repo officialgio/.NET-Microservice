@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Play.Catalog.Service;
 
+/// <summary>
+/// Record representations of Item Dtos
+/// </summary>
 public class Dtos
 {
 	public record ItemDto(Guid id, string Name, string Description, decimal Price, DateTimeOffset createdDate);
