@@ -22,7 +22,7 @@ public class ItemsRepository
     public ItemsRepository()
     {
         // Subject to change
-        var mongoClient = new MongoClient("mongodb://http://localhost:5218");
+        var mongoClient = new MongoClient("mongodb://localhost:27017");
         var database = mongoClient.GetDatabase("Catalog");
         dbCollection = database.GetCollection<Item>(collectionName);
     }
@@ -41,7 +41,6 @@ public class ItemsRepository
     public async Task CreateAsync(Item entity)
     {
         ArgumentException.ThrowIfNullOrEmpty(nameof(entity));
-
         await dbCollection.InsertOneAsync(entity);
     }
 
