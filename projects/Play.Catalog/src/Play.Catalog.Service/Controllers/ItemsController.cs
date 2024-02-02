@@ -68,7 +68,4 @@ public class ItemsController : ControllerBase
 		items.RemoveAt(index);
 		return NoContent();
 	}
-
-
 }
-
