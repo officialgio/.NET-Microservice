@@ -13,9 +13,9 @@ public class ItemsController : ControllerBase
 	/// <summary>
 	/// Use this to talk to the Data Layer of the service.
 	/// </summary>
-	private readonly IItemsRepository itemsRepository;
+	private readonly IRepository<Item> itemsRepository;
 
-	public ItemsController(IItemsRepository itemsRepository)
+	public ItemsController(IRepository<Item> itemsRepository)
 	{
 		this.itemsRepository = itemsRepository;
 	}
