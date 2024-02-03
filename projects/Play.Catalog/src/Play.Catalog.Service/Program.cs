@@ -13,28 +13,12 @@ var builder = WebApplication.CreateBuilder(args);
 IConfiguration configuration = builder.Configuration;
 
 // Add services to the container.
-
-// Keep original types when inserting MongoDB Docouments
-BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
-BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
-
-// bindings
 serviceSettings = configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
 
-// Construct the MongoDB Client
-builder.Services.AddSingleton(serviceProvider => {
-    var mongoDbSettings = configuration.GetSection(nameof(MongoDBSettings)).Get<MongoDBSettings>();
-    var mongoClient = new MongoClient(mongoDbSettings?.ConnectionString);
-    return mongoClient.GetDatabase(serviceSettings?.ServiceName);
-});
-
-// Generic MongoRepository for Items
-builder.Services.AddSingleton<IRepository<Item>>(serviceProvider =>
-{
-    // This call will work because we've registered the IMongoDatabase beforehand
-    var database = serviceProvider.GetService<IMongoDatabase>();
-    return new MongoRepository<Item>(database, "items");
-});
+// Init Mongo Instance for Items
+builder.Services
+    .AddMongo()
+    .AddMongoRepository<Item>("items");
 
 builder.Services.AddControllers(options =>
 {

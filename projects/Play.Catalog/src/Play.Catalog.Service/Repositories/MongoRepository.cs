@@ -56,5 +56,4 @@ public class MongoRepository<T> : IRepository<T> where T : IEntity
         await dbCollection.DeleteOneAsync(filter);
     }
 }
-
  
