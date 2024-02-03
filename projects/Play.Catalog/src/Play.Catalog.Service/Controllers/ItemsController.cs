@@ -10,10 +10,15 @@ namespace Play.Catalog.Service.Controllers;
 [Route("items")] // https://localhost5001/items
 public class ItemsController : ControllerBase
 {
-    /// <summary>
-    /// Use this to talk to the Data Layer of the service.
-    /// </summary>
-    private readonly ItemsRepository itemsRepository = new();
+	/// <summary>
+	/// Use this to talk to the Data Layer of the service.
+	/// </summary>
+	private readonly IItemsRepository itemsRepository;
+
+	public ItemsController(IItemsRepository itemsRepository)
+	{
+		this.itemsRepository = itemsRepository;
+	}
 
 	[HttpGet]
 	public async Task<IEnumerable<ItemDto>> GetAsync()
@@ -67,7 +72,7 @@ public class ItemsController : ControllerBase
 		existingItem.Description = updateItemDto.Description;
 		existingItem.Price = updateItemDto.Price;
 
-		await itemsRepository.updateAsync(existingItem);
+		await itemsRepository.UpdateAsync(existingItem);
 
 		return NoContent();
 	}
