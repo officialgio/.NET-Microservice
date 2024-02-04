@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
-using Play.Catalog.Service.Entities;
-using Play.Catalog.Service.Settings;
+using Play.Common.Settings;
 
-namespace Play.Catalog.Service.Repositories;
+namespace Play.Common.MongoDB;
 
 /// <summary>
 /// This class maintains concrete functionality for the IserviceCollection initialization to keep
@@ -16,17 +16,18 @@ namespace Play.Catalog.Service.Repositories;
 public static class Extensions
 {
     /// <summary>
-    /// This will create a IMongoDatabase that will be used to initially a generic
+    /// This will create a IMongoDatabase that will be used to initiate a generic
     /// MongoRepository for any Entity.
     /// </summary>
 	public static IServiceCollection AddMongo(this IServiceCollection services)
-	{
+    {
         // Keep original types when inserting MongoDB Docouments
         BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
-        BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));    
+        BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
 
         // Construct the MongoDB Client
-        services.AddSingleton(serviceProvider => {
+        services.AddSingleton(serviceProvider =>
+        {
             // Get configuration service from insfrastructure
             var configuration = serviceProvider.GetService<IConfiguration>();
 

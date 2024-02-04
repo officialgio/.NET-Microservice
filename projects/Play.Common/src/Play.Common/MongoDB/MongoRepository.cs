@@ -1,9 +1,9 @@
 ﻿
 using System;
+using System.Linq.Expressions;
 using MongoDB.Driver;
-using Play.Catalog.Service.Entities;
 
-namespace Play.Catalog.Service.Repositories;
+namespace Play.Common.MongoDB;
 
 /// <summary>
 /// This class provides a generic Singleton instance that can be used by other Microservices.
@@ -31,9 +31,19 @@ public class MongoRepository<T> : IRepository<T> where T : IEntity
         return await dbCollection.Find(filterBuilder.Empty).ToListAsync();
     }
 
+    public async Task<IReadOnlyCollection<T>> GetAllAsync(Expression<Func<T, bool>> filter)
+    {
+        return await dbCollection.Find(filter).ToListAsync();
+    }
+
     public async Task<T> GetAsync(Guid id)
     {
         FilterDefinition<T> filter = filterBuilder.Eq(entity => entity.id, id);
+        return await dbCollection.Find(filter).FirstOrDefaultAsync();
+    }
+
+    public async Task<T> GetAsync(Expression<Func<T, bool>> filter)
+    {
         return await dbCollection.Find(filter).FirstOrDefaultAsync();
     }
 
@@ -56,4 +66,3 @@ public class MongoRepository<T> : IRepository<T> where T : IEntity
         await dbCollection.DeleteOneAsync(filter);
     }
 }
- 

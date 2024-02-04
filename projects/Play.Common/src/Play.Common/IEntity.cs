@@ -1,4 +1,4 @@
-﻿namespace Play.Catalog.Service.Entities;
+﻿namespace Play.Common;
 
 /// <summary>
 /// For generic Models usage
