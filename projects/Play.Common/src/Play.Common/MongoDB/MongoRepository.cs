@@ -38,7 +38,7 @@ public class MongoRepository<T> : IRepository<T> where T : IEntity
 
     public async Task<T> GetAsync(Guid id)
     {
-        FilterDefinition<T> filter = filterBuilder.Eq(entity => entity.id, id);
+        FilterDefinition<T> filter = filterBuilder.Eq(entity => entity.Id, id);
         return await dbCollection.Find(filter).FirstOrDefaultAsync();
     }
 
@@ -56,13 +56,13 @@ public class MongoRepository<T> : IRepository<T> where T : IEntity
     public async Task UpdateAsync(T entity)
     {
         ArgumentException.ThrowIfNullOrEmpty(nameof(entity));
-        FilterDefinition<T> filter = filterBuilder.Eq(existingEntity => existingEntity.id, entity.id);
+        FilterDefinition<T> filter = filterBuilder.Eq(existingEntity => existingEntity.Id, entity.Id);
         await dbCollection.ReplaceOneAsync(filter, entity);
     }
 
     public async Task RemoveAsync(Guid id)
     {
-        FilterDefinition<T> filter = filterBuilder.Eq(entity => entity.id, id);
+        FilterDefinition<T> filter = filterBuilder.Eq(entity => entity.Id, id);
         await dbCollection.DeleteOneAsync(filter);
     }
 }

@@ -5,5 +5,5 @@
 /// </summary>
 public interface IEntity
 {
-    Guid id { get; set; }
+    Guid Id { get; set; }
 }

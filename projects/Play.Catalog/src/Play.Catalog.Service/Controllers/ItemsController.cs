@@ -55,7 +55,7 @@ public class ItemsController : ControllerBase
 
 		await itemsRepository.CreateAsync(item);
 
-		return CreatedAtAction(nameof(GetByIdAsync), new { id = item.id }, item);
+		return CreatedAtAction(nameof(GetByIdAsync), new { id = item.Id }, item);
 	}
 
 	[HttpPut]
@@ -87,7 +87,7 @@ public class ItemsController : ControllerBase
 			return NotFound(); 
 		}
 
-		await itemsRepository.RemoveAsync(item.id);
+		await itemsRepository.RemoveAsync(item.Id);
 
 		return NoContent();
 	}
