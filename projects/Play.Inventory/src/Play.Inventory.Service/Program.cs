@@ -1,12 +1,21 @@
 using Play.Common.MongoDB;
+using Play.Inventory.Service.Clients;
 using Play.Inventory.Service.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Register and build the custom Mongo Database
 builder
     .Services.AddMongo()
     .AddMongoRepository<InventoryItem>("inventoryitems");
+
+// Register CatalogClient to talk to REST Endpoints
+builder.Services.AddHttpClient<CatalogClient>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5218") ;
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

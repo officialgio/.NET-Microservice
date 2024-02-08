@@ -2,20 +2,30 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Play.Common;
+using Play.Inventory.Service.Clients;
 using Play.Inventory.Service.Entities;
 using static Play.Inventory.Service.Dtos;
 
 namespace Play.Inventory.Service.Controller;
 
 [ApiController]
-[Route("items")] // base route
+[Route("items")]
 public class ItemsController : ControllerBase
 {
-	private readonly IRepository<InventoryItem> itemsRepository;
+    /// <summary>
+    /// This is a referenece to the MongoDatabase Collection
+    /// </summary>
+    private readonly IRepository<InventoryItem> itemsRepository;
 
-	public ItemsController(IRepository<InventoryItem> itemsRepository)
+    /// <summary>
+    /// Reference to talk to the Catalog Microservice
+    /// </summary>
+    private readonly CatalogClient catalogClient;
+
+	public ItemsController(IRepository<InventoryItem> itemsRepository, CatalogClient catalogClient)
 	{
 		this.itemsRepository = itemsRepository;
+		this.catalogClient = catalogClient;
 	}
 
 	[HttpGet]
@@ -26,11 +36,21 @@ public class ItemsController : ControllerBase
 			return BadRequest();
 		}
 
+		// Get Catalog Items from the Catalog Service 1 st
+		var catalogItems = await catalogClient.GetCatalogItemsAsync();
+
 		Expression<Func<InventoryItem, bool>> filterFunc = item => item.UserId == userId;
 
-		var items = (await itemsRepository.GetAllAsync(filterFunc)).Select(item => item.AsDto());
+		// The item UserId must be the same from the param userId within our Inventory Db collection
+		// If so, grab the item only if it the catalogItem Id matches with inventory CatalogItemId.
+		var inventoryItemEntities = await itemsRepository.GetAllAsync(filterFunc);
+		var inventoryItemDtos = inventoryItemEntities.Select(inventoryItem =>
+		{
+			var catalogItem = catalogItems.Single(catalogItem => catalogItem.Id == inventoryItem.CatalogItemId);
+			return inventoryItem.AsDto(catalogItem.Name, catalogItem.Description);
+		});
 
-		return Ok(items); 
+		return Ok(inventoryItemDtos); 
 	}
 
 	[HttpPost]

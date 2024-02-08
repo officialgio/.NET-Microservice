@@ -17,9 +17,11 @@
   <ItemGroup>
     <None Remove="Entities\" />
     <None Remove="Controller\" />
+    <None Remove="Clients\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Entities\" />
     <Folder Include="Controller\" />
+    <Folder Include="Clients\" />
   </ItemGroup>
 </Project>
