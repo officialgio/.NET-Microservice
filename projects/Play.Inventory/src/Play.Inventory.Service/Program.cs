@@ -29,10 +29,27 @@ builder.Services.AddHttpClient<CatalogClient>(client =>
     {
         // Get Service instance (NOTE: This is done as is for now...)
         var serviceProvider = builder.Services.BuildServiceProvider();
-        serviceProvider.GetService<ILogger<CatalogClient>>()?
+        serviceProvider.GetService<ILogger<CatalogClient>>() ?
             .LogWarning($"Delaying for {timespan.TotalSeconds} seconds, then making retry {retryAttempt}");
     }
 ))
+.AddTransientHttpErrorPolicy(_builder =>  _builder.Or<TimeoutRejectedException>().CircuitBreakerAsync(
+    3, // allow 3 requests
+    TimeSpan.FromSeconds(15), // wait 15secs (won't allow calls within this time frame)
+    onBreak: (outcome, timespan) =>
+    {
+        // When circuit breaker opens
+        var serviceProvider = builder.Services.BuildServiceProvider();
+        serviceProvider.GetService<ILogger<CatalogClient>>() ?
+            .LogWarning($"Opening the circuit for {timespan.TotalSeconds} seconds...");
+    },
+    onReset: () =>
+    {
+        // When circuit cloeses
+        var serviceProvider = builder.Services.BuildServiceProvider();
+        serviceProvider.GetService<ILogger<CatalogClient>>()?.LogWarning($"Closing the circuit...");
+    }
+    ))
 .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(1));
 
 builder.Services.AddControllers();
