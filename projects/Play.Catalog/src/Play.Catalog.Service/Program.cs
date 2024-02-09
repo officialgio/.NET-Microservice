@@ -1,4 +1,6 @@
+using MassTransit;
 using Play.Catalog.Service.Entities;
+using Play.Catalog.Service.Settings;
 using Play.Common.MongoDB;
 using Play.Common.Settings;
 
@@ -16,6 +18,19 @@ builder.Services
     .AddMongo()
     .AddMongoRepository<Item>("items");
 
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, configurator) => 
+    { 
+        // Register an instance of the RabbitMQ Settings and apply necessary configurations
+        var rabbnitMQSettings = configuration.GetSection(nameof(RabbitMQSettings)).Get<RabbitMQSettings>();
+        configurator.Host(rabbnitMQSettings.Host);
+        configurator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter(serviceSettings.ServiceName, false));
+    });
+});
+
+// Start the RabbitMQ Service (deprecated - no need for this!)
+// builder.Services.AddMassTransitHostedService();
 
 builder.Services.AddControllers(options =>
 {

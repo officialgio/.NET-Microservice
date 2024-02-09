@@ -1,7 +1,8 @@
-﻿using System;
+﻿using MassTransit;
 using Microsoft.AspNetCore.Mvc;
-using Play.Catalog.Service.Entities; 
+using Play.Catalog.Service.Entities;
 using Play.Common;
+using static Play.Catalog.Contracts.Contracts;
 using static Play.Catalog.Service.Dtos;
 
 namespace Play.Catalog.Service.Controllers;
@@ -15,37 +16,24 @@ public class ItemsController : ControllerBase
 	/// </summary>
 	private readonly IRepository<Item> itemsRepository;
 
-	private static int requestCounter = 0;
+	/// <summary>
+	/// Use this to send messages to some location. 
+	/// </summary>
+	private readonly IPublishEndpoint publishEndPoint;
 
-	public ItemsController(IRepository<Item> itemsRepository)
+	public ItemsController(IRepository<Item> itemsRepository, IPublishEndpoint publishEndPoint)
 	{
 		this.itemsRepository = itemsRepository;
+		this.publishEndPoint = publishEndPoint;
 	}
 
 	[HttpGet]
 	public async Task<ActionResult<IEnumerable<ItemDto>>> GetAsync()
 	{
-		requestCounter++;
-
-		Console.WriteLine($"request: {requestCounter} - Starting...");
-
-		if (requestCounter <= 2)
-		{
-            Console.WriteLine($"request: {requestCounter} - Delaying...");
-			await Task.Delay(TimeSpan.FromSeconds(10)) ;
-        }
-
-        if (requestCounter <= 4)
-        {
-            Console.WriteLine($"request: {requestCounter} - 500 (Internal Server Error)...");
-			return StatusCode(500);
-        }
-
-        var items = (await itemsRepository.GetAllAsync())
+		var items = (await itemsRepository.GetAllAsync())
 			.Select(item => item.AsDto());
 
-        Console.WriteLine($"request: {requestCounter} - 200 (Ok)");
-        return Ok(items);
+		return Ok(items);
 	}
 
 	[HttpGet("{id}")]
@@ -72,7 +60,9 @@ public class ItemsController : ControllerBase
 			CreatedAt = DateTimeOffset.UtcNow
 		};
 
+		// Create and publish the message for consumer usage 
 		await itemsRepository.CreateAsync(item);
+		await publishEndPoint.Publish(new CatalogItemCreated(item.Id, item.Name, item.Description));
 
 		return CreatedAtAction(nameof(GetByIdAsync), new { id = item.Id }, item);
 	}
@@ -91,7 +81,9 @@ public class ItemsController : ControllerBase
 		existingItem.Description = updateItemDto.Description;
 		existingItem.Price = updateItemDto.Price;
 
-		await itemsRepository.UpdateAsync(existingItem);
+        // Create and publish the message for consumer usage
+        await itemsRepository.UpdateAsync(existingItem);
+		await publishEndPoint.Publish(new CatalogItemUpdated(existingItem.Id, existingItem.Name, existingItem.Description));
 
 		return NoContent();
 	}
@@ -99,14 +91,16 @@ public class ItemsController : ControllerBase
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> DeleteAsync(Guid id)
 	{
-		var item =  await itemsRepository.GetAsync(id); 
+		var item = await itemsRepository.GetAsync(id);
 
 		if (item is null)
 		{
-			return NotFound(); 
+			return NotFound();
 		}
 
-		await itemsRepository.RemoveAsync(item.Id);
+        // Delete and publish the message for consumer usage
+        await itemsRepository.RemoveAsync(item.Id);
+		await publishEndPoint.Publish(new CatalogItemDeleted(id));
 
 		return NoContent();
 	}
