@@ -10,7 +10,7 @@ namespace Play.Common.MongoDB;
 
 /// <summary>
 /// This class maintains concrete functionality for the IserviceCollection initialization to keep
-/// everything abstracted and clean within the Program.cs file and initialize any general instances
+/// everything abstracted and clean within the Program.cs file and initialize any general Mongo instances
 /// of services.
 /// </summary>
 public static class Extensions
