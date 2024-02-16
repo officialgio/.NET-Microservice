@@ -15,17 +15,20 @@ public class ItemsController : ControllerBase
     /// <summary>
     /// This is a referenece to the MongoDatabase Collection
     /// </summary>
-    private readonly IRepository<InventoryItem> itemsRepository;
+    private readonly IRepository<InventoryItem> inventoryItemsRepository;
 
     /// <summary>
-    /// Reference to talk to the Catalog Microservice
+    /// Reference to talk to the Catalog Microservice (not used anymore)
+	/// Migrated to RabbitMQ
     /// </summary>
     private readonly CatalogClient catalogClient;
 
-	public ItemsController(IRepository<InventoryItem> itemsRepository, CatalogClient catalogClient)
+	private readonly IRepository<CatalogItem> catalogItemsRepository;
+
+	public ItemsController(IRepository<InventoryItem> inventoryItemsRepository, IRepository<CatalogItem> catalogItemsRepository)
 	{
-		this.itemsRepository = itemsRepository;
-		this.catalogClient = catalogClient;
+		this.inventoryItemsRepository = inventoryItemsRepository;
+		this.catalogItemsRepository = catalogItemsRepository;
 	}
 
 	[HttpGet]
@@ -36,17 +39,20 @@ public class ItemsController : ControllerBase
 			return BadRequest();
 		}
 
-		// Get Catalog Items from the Catalog Service 1 st
-		var catalogItems = await catalogClient.GetCatalogItemsAsync();
+		// Get Catalog Items from the Catalog Service 1 (not needed)
+		//var catalogItems = await catalogClient.GetCatalogItemsAsync();
 
 		Expression<Func<InventoryItem, bool>> filterFunc = item => item.UserId == userId;
 
 		// The item UserId must be the same from the param userId within our Inventory Db collection
 		// If so, grab the item only if it the catalogItem Id matches with inventory CatalogItemId.
-		var inventoryItemEntities = await itemsRepository.GetAllAsync(filterFunc);
+		var inventoryItemEntities = await inventoryItemsRepository.GetAllAsync(filterFunc);
+		var itemsIds = inventoryItemEntities.Select(item => item.CatalogItemId);
+		var catalogItemEntities = await catalogItemsRepository.GetAllAsync(item => itemsIds.Contains(item.Id));
+
 		var inventoryItemDtos = inventoryItemEntities.Select(inventoryItem =>
 		{
-			var catalogItem = catalogItems.Single(catalogItem => catalogItem.Id == inventoryItem.CatalogItemId);
+			var catalogItem = catalogItemEntities.Single(catalogItem => catalogItem.Id == inventoryItem.CatalogItemId);
 			return inventoryItem.AsDto(catalogItem.Name, catalogItem.Description);
 		});
 
@@ -61,7 +67,7 @@ public class ItemsController : ControllerBase
 		Expression<Func<InventoryItem, bool>> filter =
 			item => item.UserId == grantItemsDto.UserId && item.CatalogItemId == grantItemsDto.CatalogItemId;
 
-		var inventoryItem = await itemsRepository.GetAsync(filter);
+		var inventoryItem = await inventoryItemsRepository.GetAsync(filter);
 
 		if (inventoryItem is null)
 		{
@@ -73,12 +79,12 @@ public class ItemsController : ControllerBase
 				AcquiredDate = DateTimeOffset.UtcNow,
 			};
 
-			await itemsRepository.CreateAsync(inventoryItem);
+			await inventoryItemsRepository.CreateAsync(inventoryItem);
 		}
 		else
 		{
 			inventoryItem.Quantity += grantItemsDto.Quantity;
-			await itemsRepository.UpdateAsync(inventoryItem);
+			await inventoryItemsRepository.UpdateAsync(inventoryItem);
 		}
 		return Ok();
 	}

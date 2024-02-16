@@ -11,7 +11,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.7" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.1" />
-    <PackageReference Include="Play.Common" Version="1.0.0" />
+    <PackageReference Include="Play.Catalog.Contracts" Version="1.0.0" />
+    <PackageReference Include="Play.Common" Version="1.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
@@ -19,10 +20,12 @@
     <None Remove="Entities\" />
     <None Remove="Controller\" />
     <None Remove="Clients\" />
+    <None Remove="Consumers\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Entities\" />
     <Folder Include="Controller\" />
     <Folder Include="Clients\" />
+    <Folder Include="Consumers\" />
   </ItemGroup>
 </Project>

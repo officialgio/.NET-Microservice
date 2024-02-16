@@ -33,6 +33,10 @@ public static class Extensions
                 var rabbnitMQSettings = configuration.GetSection(nameof(RabbitMQSettings)).Get<RabbitMQSettings>();
                 configurator.Host(rabbnitMQSettings?.Host);
                 configurator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter(serviceSettings?.ServiceName, false));
+                configurator.UseMessageRetry(retryConfigurator =>
+                {
+                    retryConfigurator.Interval(3, TimeSpan.FromSeconds(5));
+                });
             });
         });
         return services;

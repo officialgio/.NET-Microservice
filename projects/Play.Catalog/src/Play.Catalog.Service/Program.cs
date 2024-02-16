@@ -14,14 +14,11 @@ IConfiguration configuration = builder.Configuration;
 serviceSettings = configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
 
 // Init Mongo Instance for Items
+// Start the RabbitMQ Service
 builder.Services
     .AddMongo()
     .AddMongoRepository<Item>("items")
     .AddMassTransitWithRabbitMq();
-
-
-// Start the RabbitMQ Service (deprecated - no nHeed for this!)
-//builder.Services.AddMassTransitHostedService();
 
 builder.Services.AddControllers(options =>
 {
