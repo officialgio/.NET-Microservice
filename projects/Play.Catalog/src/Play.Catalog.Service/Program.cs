@@ -1,3 +1,4 @@
+using System.Net;
 using MassTransit;
 using Play.Catalog.Service.Entities;
 using Play.Common.MassTransit;
@@ -7,6 +8,8 @@ using Play.Common.Settings;
 ServiceSettings serviceSettings;
 
 var builder = WebApplication.CreateBuilder(args);
+
+const string AllowedOriginSetting = "AllowedOrigin";
 
 IConfiguration configuration = builder.Configuration;
 
@@ -37,6 +40,17 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Cors Middleware
+    app.UseCors(builder =>
+    {
+        // use configuration object b/c the object contains all the data from the appsettings automatically
+        // by the ASP.NET Core runtime.
+        builder
+        .WithOrigins(configuration[AllowedOriginSetting])
+        .AllowAnyHeader()
+        .AllowAnyMethod(); 
+    });
 }
 
 app.UseHttpsRedirection();

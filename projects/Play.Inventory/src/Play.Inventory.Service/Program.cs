@@ -7,8 +7,11 @@ using Polly.Timeout;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+const string AllowedOriginSetting = "AllowedOrigin";
 
+IConfiguration configuration = builder.Configuration;
+
+// Add services to the container.
 // Register and build the custom Mongo Database
 builder
     .Services.AddMongo()
@@ -28,6 +31,17 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Cors Middleware
+    app.UseCors(builder =>
+    {
+        // use configuration object b/c the object contains all the data from the appsettings automatically
+        // by the ASP.NET Core runtime.
+        builder
+        .WithOrigins(configuration[AllowedOriginSetting])
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
 }
 
 app.UseHttpsRedirection();
