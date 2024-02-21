@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using AspNetCore.Identity.MongoDbCore.Models;
 using MongoDbGenericRepository.Attributes;
 
@@ -8,7 +8,7 @@ namespace Play.Identity.Service.Entities;
 public class ApplicationUser : MongoIdentityUser<Guid>
 {
     /// <summary>
-    /// THe amount of the User Gil
+    /// Amount of Gil of the user.
     /// </summary>
     public decimal Gil { get; set; }
 }

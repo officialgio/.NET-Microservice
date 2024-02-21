@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Play.Identity.Service.Dtos;
 using Play.Identity.Service.Entities;
-using static Play.Identity.Service.Dtos;
 
 namespace Play.Identity.Service.Controllers;
 
@@ -13,67 +13,71 @@ namespace Play.Identity.Service.Controllers;
 [Route("users")]
 public class UsersController : ControllerBase
 {
-	/// <summary>
+    /// <summary>
 	/// This instance allows to talk directly to the UserManager within the ASP.NET Core Identity.
 	/// </summary>
-	private readonly UserManager<ApplicationUser> userManager;
+    private readonly UserManager<ApplicationUser> userManager;
 
-	public UsersController(UserManager<ApplicationUser> userManager)
-	{
-		this.userManager = userManager;
-	}
-
-	[HttpGet]
-	public ActionResult<IEnumerable<UserDto>> Get()
-	{
-		var users = userManager.Users.ToList().Select(user => user.AsDto());
-		return Ok(users);
-	}
-
-	[HttpGet("{id}")]
-	public async Task<ActionResult<UserDto>> GetByIdAsync(Guid id)
-	{
-		var user = await userManager.FindByIdAsync(id.ToString());
-
-		if (user is null)
-		{
-			return NotFound();
-		}
-
-		return user.AsDto();
-	}
-
-	[HttpPut("{id}")]
-	public async Task<IActionResult> PutAsync(Guid id, UpdateUserDto userDto)
-	{
-        var user = await userManager.FindByIdAsync(id.ToString());
-
-        if (user is null)
-        {
-            return NotFound();
-        }
-
-		user.Email = userDto.Email;
-		user.UserName = userDto.Email;
-		user.Gil = userDto.Gil;
-
-		await userManager.UpdateAsync(user);
-
-		return NoContent();
+    public UsersController(UserManager<ApplicationUser> userManager)
+    {
+        this.userManager = userManager;
     }
 
-	[HttpDelete("{id}")]
-	public async Task<IActionResult> DeleteAsync(Guid id)
-	{
+    [HttpGet]
+    public ActionResult<IEnumerable<UserDto>> Get()
+    {
+        var users = userManager.Users
+            .ToList()
+            .Select(user => user.AsDto());
+
+        return Ok(users);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserDto>> GetByIdAsync(Guid id)
+    {
         var user = await userManager.FindByIdAsync(id.ToString());
 
-        if (user is null)
+        if (user == null)
         {
             return NotFound();
         }
 
-		await userManager.DeleteAsync(user);
+        return user.AsDto();
+    }
 
-		return NoContent(); 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutAsync(Guid id, UpdateUserDto userDto)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        user.Email = userDto.Email;
+        user.UserName = userDto.Email;
+        user.Gil = userDto.Gil;
+
+        await userManager.UpdateAsync(user);
+
+        return NoContent();
+    }
+
+    // /users/{123}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteAsync(Guid id)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        await userManager.DeleteAsync(user);
+
+        return NoContent();
     }
 }
