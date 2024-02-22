@@ -1,5 +1,6 @@
 using System.Net;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Play.Catalog.Service.Entities;
 using Play.Common.MassTransit;
 using Play.Common.MongoDB;
@@ -23,10 +24,19 @@ builder.Services
     .AddMongoRepository<Item>("items")
     .AddMassTransitWithRabbitMq();
 
+// Authentication configuration
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "https://localhost:5003"; // authorized to received tokens - Identity Service
+        options.Audience = serviceSettings.ServiceName; // accept tokens for Catalog - Must set in Identity Service AppSettings!
+    });
+
 builder.Services.AddControllers(options =>
 {
     // Avoid ASP.NET Core Removing Async Suffix at Runtime
-    options.SuppressAsyncSuffixInActionNames = false;    
+    options.SuppressAsyncSuffixInActionNames = false;
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -44,16 +54,19 @@ if (app.Environment.IsDevelopment())
     // Cors Middleware
     app.UseCors(builder =>
     {
-        // use configuration object b/c the object contains all the data from the appsettings automatically
+        // use configuration[index<string>] object b/c the object c
+        // ontains all the data from the appsettings automatically
         // by the ASP.NET Core runtime.
         builder
         .WithOrigins(configuration[AllowedOriginSetting])
         .AllowAnyHeader()
-        .AllowAnyMethod(); 
+        .AllowAnyMethod();
     });
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

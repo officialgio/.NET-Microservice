@@ -65,7 +65,6 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
-    // /users/{123}
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {

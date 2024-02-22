@@ -39,8 +39,7 @@ public class Startup
         // Bindings
         var serviceSettings = Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
         var mongoDbSettings = Configuration.GetSection(nameof(MongoDBSettings)).Get<MongoDBSettings>();
-
-        var identityServiceSettings = new IdentityServerSettings();
+        var identityServiceSettings = Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
 
         // Default Configurations for Identity Mongo DB
         services.AddDefaultIdentity<ApplicationUser>()
@@ -51,10 +50,18 @@ public class Startup
                 serviceSettings.ServiceName
             );
 
+        // Default Configurations for Identity Service
         services
-            .AddIdentityServer()
+            .AddIdentityServer(options =>
+            {
+                // For logging purposes
+                options.Events.RaiseSuccessEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseErrorEvents = true;
+            })
             .AddAspNetIdentity<ApplicationUser>()
             .AddInMemoryApiScopes(identityServiceSettings.ApiScopes)
+            .AddInMemoryApiResources(identityServiceSettings.ApiResources)
             .AddInMemoryClients(identityServiceSettings.Clients)
             .AddInMemoryIdentityResources(identityServiceSettings.identityResources);
 
@@ -81,6 +88,7 @@ public class Startup
 
         app.UseRouting();
 
+        // Add this after UseRouting()
         app.UseIdentityServer();
 
         app.UseAuthorization();

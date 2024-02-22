@@ -1,4 +1,5 @@
 ﻿using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Play.Catalog.Service.Entities;
 using Play.Common;
@@ -9,6 +10,7 @@ namespace Play.Catalog.Service.Controllers;
 
 [ApiController]
 [Route("items")] // https://localhost5001/items
+[Authorize] // only authorized calls can make requests
 public class ItemsController : ControllerBase
 {
 	/// <summary>
