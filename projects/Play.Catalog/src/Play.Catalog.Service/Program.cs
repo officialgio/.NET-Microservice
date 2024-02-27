@@ -2,6 +2,7 @@ using System.Net;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Play.Catalog.Service.Entities;
+using Play.Common.Identity;
 using Play.Common.MassTransit;
 using Play.Common.MongoDB;
 using Play.Common.Settings;
@@ -22,16 +23,8 @@ serviceSettings = configuration.GetSection(nameof(ServiceSettings)).Get<ServiceS
 builder.Services
     .AddMongo()
     .AddMongoRepository<Item>("items")
-    .AddMassTransitWithRabbitMq();
-
-// Authentication configuration
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = "https://localhost:5003"; // authorized to received tokens - Identity Service
-        options.Audience = serviceSettings.ServiceName; // accept tokens for Catalog - Must set in Identity Service AppSettings!
-    });
+    .AddMassTransitWithRabbitMq()
+    .AddJwtBearerAuthentication();
 
 builder.Services.AddControllers(options =>
 {

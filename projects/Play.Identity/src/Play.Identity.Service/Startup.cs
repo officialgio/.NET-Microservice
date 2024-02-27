@@ -65,6 +65,9 @@ public class Startup
             .AddInMemoryClients(identityServiceSettings.Clients)
             .AddInMemoryIdentityResources(identityServiceSettings.identityResources);
 
+        // Add this line to secure Api with built in Policy
+        services.AddLocalApiAuthentication();
+
         services.AddControllers();
         services.AddSwaggerGen(c =>
         {

@@ -1,3 +1,4 @@
+using Play.Common.Identity;
 using Play.Common.MassTransit;
 using Play.Common.MongoDB;
 using Play.Inventory.Service.Clients;
@@ -13,11 +14,14 @@ IConfiguration configuration = builder.Configuration;
 
 // Add services to the container.
 // Register and build the custom Mongo Database
+// Register MassTransit to consume meessages
+// Register Identity Service
 builder
     .Services.AddMongo()
-    .AddMongoRepository<InventoryItem>("inventoryitems") // not used
+    .AddMongoRepository<InventoryItem>("inventoryitems")
     .AddMongoRepository<CatalogItem>("catalogitems")
-    .AddMassTransitWithRabbitMq();
+    .AddMassTransitWithRabbitMq()
+    .AddJwtBearerAuthentication();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -45,6 +49,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

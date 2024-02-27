@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Play.Common;
 using Play.Inventory.Service.Clients;
@@ -10,6 +11,7 @@ namespace Play.Inventory.Service.Controller;
 
 [ApiController]
 [Route("items")]
+[Authorize]
 public class ItemsController : ControllerBase
 {
     /// <summary>
@@ -18,12 +20,15 @@ public class ItemsController : ControllerBase
     private readonly IRepository<InventoryItem> inventoryItemsRepository;
 
     /// <summary>
+    /// This is a referenece to the MongoDatabase Collection
+    /// </summary>
+    private readonly IRepository<CatalogItem> catalogItemsRepository;
+
+    /// <summary>
     /// Reference to talk to the Catalog Microservice (not used anymore)
 	/// Migrated to RabbitMQ
     /// </summary>
     private readonly CatalogClient catalogClient;
-
-	private readonly IRepository<CatalogItem> catalogItemsRepository;
 
 	public ItemsController(IRepository<InventoryItem> inventoryItemsRepository, IRepository<CatalogItem> catalogItemsRepository)
 	{
@@ -48,6 +53,8 @@ public class ItemsController : ControllerBase
 		// If so, grab the item only if it the catalogItem Id matches with inventory CatalogItemId.
 		var inventoryItemEntities = await inventoryItemsRepository.GetAllAsync(filterFunc);
 		var itemsIds = inventoryItemEntities.Select(item => item.CatalogItemId);
+
+		// Get the catalog items again to obtain addtional information
 		var catalogItemEntities = await catalogItemsRepository.GetAllAsync(item => itemsIds.Contains(item.Id));
 
 		var inventoryItemDtos = inventoryItemEntities.Select(inventoryItem =>
