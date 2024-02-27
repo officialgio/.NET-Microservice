@@ -17,6 +17,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Play.Common.Settings;
 using Play.Identity.Service.Entities;
+using Play.Identity.Service.HostedServices;
 using Play.Identity.Service.Settings;
 
 namespace Play.Identity.Service;
@@ -42,7 +43,9 @@ public class Startup
         var identityServiceSettings = Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
 
         // Default Configurations for Identity Mongo DB
-        services.AddDefaultIdentity<ApplicationUser>()
+        services
+            .Configure<IdentitySettings>(Configuration.GetSection(nameof(IdentitySettings))) // for IOptions<IdentitySettings>
+            .AddDefaultIdentity<ApplicationUser>()
             .AddRoles<ApplicationRole>()
             .AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>
             (
@@ -69,6 +72,10 @@ public class Startup
         services.AddLocalApiAuthentication();
 
         services.AddControllers();
+
+        // Register HostedServices here
+        services.AddHostedService<IdentitySeedHostedService>();
+
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Play.Identity.Service", Version = "v1" });
