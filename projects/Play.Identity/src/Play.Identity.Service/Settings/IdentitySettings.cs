@@ -11,4 +11,9 @@ public class IdentitySettings
 	/// The password for the admin email that is kept as a secret.
 	/// </summary>
 	public string AdminUserPassword { get; init; }
+
+	/// <summary>
+	/// The Starting Gil
+	/// </summary>
+	public decimal StartingGil { get; init; }
 }
