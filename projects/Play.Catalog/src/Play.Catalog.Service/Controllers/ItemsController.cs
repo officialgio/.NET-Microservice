@@ -10,9 +10,14 @@ namespace Play.Catalog.Service.Controllers;
 
 [ApiController]
 [Route("items")] // https://localhost5001/items
-[Authorize] // only authorized calls can make requests
+[Authorize(Roles = AdminRole)] // only authorized calls can make requests
 public class ItemsController : ControllerBase
 {
+	/// <summary>
+	/// Anyone hitting this API must have an admin claim.
+	/// </summary>
+	private const string AdminRole = "Admin";
+
 	/// <summary>
 	/// Use this to talk to the Data Layer of the service.
 	/// </summary>

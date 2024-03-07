@@ -43,10 +43,11 @@ public class Startup
         var identityServiceSettings = Configuration.GetSection(nameof(IdentityServerSettings)).Get<IdentityServerSettings>();
 
         // Default Configurations for Identity Mongo DB
+        // Note: You're able to retrieve IdentitySettings from the runtime.
         services
             .Configure<IdentitySettings>(Configuration.GetSection(nameof(IdentitySettings))) // for IOptions<IdentitySettings>
             .AddDefaultIdentity<ApplicationUser>()
-            .AddRoles<ApplicationRole>()
+            .AddRoles<ApplicationRole>() // registers managers dependencies
             .AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>
             (
                 mongoDbSettings.ConnectionString,

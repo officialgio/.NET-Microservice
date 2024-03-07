@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +12,10 @@ namespace Play.Inventory.Service.Controller;
 
 [ApiController]
 [Route("items")]
-[Authorize]
 public class ItemsController : ControllerBase
 {
+	private const string AdminRole = "Admin";
+
     /// <summary>
     /// This is a referenece to the MongoDatabase Collection
     /// </summary>
@@ -37,11 +39,25 @@ public class ItemsController : ControllerBase
 	}
 
 	[HttpGet]
+	[Authorize]
 	public async Task<ActionResult<IEnumerable<InventoryItemDto>>> GetAsync(Guid userId)
 	{
 		if (userId == Guid.Empty)
 		{
 			return BadRequest();
+		}
+
+		// Retrieve the sub claim for this user (userId)
+		var currentUserId = User.FindFirst(JwtRegisteredClaimNames.Sub).Value;
+		
+		// If the currentUser who is calling this api is not the matched user in db
+		// and check if its role is not admin then they're not authorized to call this endpoint.
+		if (Guid.Parse(currentUserId) != userId)
+		{
+			if (!User.IsInRole(AdminRole))
+			{
+				return Forbid();
+			}
 		}
 
 		// Get Catalog Items from the Catalog Service 1 (not needed)
@@ -67,6 +83,7 @@ public class ItemsController : ControllerBase
 	}
 
 	[HttpPost]
+	[Authorize(Roles = AdminRole)]
 	public async Task<ActionResult> PostAsync(GrantItemsDto grantItemsDto)
 	{
 		// Check if it exist, if it it's null create a new InventoryItem
