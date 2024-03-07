@@ -1,6 +1,7 @@
 using System.Net;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Play.Catalog.Service;
 using Play.Catalog.Service.Entities;
 using Play.Common.Identity;
 using Play.Common.MassTransit;
@@ -25,6 +26,23 @@ builder.Services
     .AddMongoRepository<Item>("items")
     .AddMassTransitWithRabbitMq()
     .AddJwtBearerAuthentication();
+
+// If you wan to read/write the Catalog Service
+// you must be an admin role along with the respective claims.
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Policies.Read, policy =>
+    {
+        policy.RequireRole("Admin");
+        policy.RequireClaim("scope", "catalog.readaccess", "catalog.fullaccess");
+    });
+
+    options.AddPolicy(Policies.Write, policy =>
+    {
+        policy.RequireRole("Admin");
+        policy.RequireClaim("scope", "catalog.writeaccess", "catalog.fullaccess");
+    });
+});
 
 builder.Services.AddControllers(options =>
 {
