@@ -10,7 +10,6 @@ namespace Play.Catalog.Service.Controllers;
 
 [ApiController]
 [Route("items")] // https://localhost5001/items
-//[Authorize(Roles = AdminRole)] // only authorized calls can make requests
 public class ItemsController : ControllerBase
 {
 	/// <summary>

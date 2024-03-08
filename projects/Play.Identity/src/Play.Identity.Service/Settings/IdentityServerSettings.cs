@@ -32,6 +32,7 @@ public class IdentityServerSettings
     {
         new IdentityResources.OpenId(),
         new IdentityResources.Profile(),
+        new IdentityResource("roles", new[] {"role"})
     };
 }
 
