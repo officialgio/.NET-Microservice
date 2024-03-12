@@ -6,13 +6,18 @@
 
   <ItemGroup>
     <PackageReference Include="MassTransit" Version="7.3.1" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.3.1" />
+    <PackageReference Include="MassTransit.MongoDb" Version="7.3.1" />
+    <PackageReference Include="Play.Common" Version="1.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="StateMachines\" />
+    <None Remove="Controllers\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="StateMachines\" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
 </Project>
