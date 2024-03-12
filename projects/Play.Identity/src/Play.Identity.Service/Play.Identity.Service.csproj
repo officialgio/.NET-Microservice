@@ -11,14 +11,21 @@
     <PackageReference Include="Duende.IdentityServer.AspNetIdentity" Version="6.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.0" />
-    <PackageReference Include="Play.Common" Version="1.0.3" />
+    <PackageReference Include="Play.Common" Version="1.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="HostedServices\" />
+    <None Remove="Consumers\" />
+    <None Remove="Exceptions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="HostedServices\" />
+    <Folder Include="Consumers\" />
+    <Folder Include="Exceptions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Play.Identity.Contracts\Play.Identity.Contracts.csproj" />
   </ItemGroup>
 </Project>

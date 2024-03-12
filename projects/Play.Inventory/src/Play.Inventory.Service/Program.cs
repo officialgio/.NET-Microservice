@@ -1,7 +1,9 @@
+using MassTransit;
 using Play.Common.Identity;
 using Play.Common.MassTransit;
 using Play.Common.MongoDB;
 using Play.Inventory.Service.Clients;
+using Play.Inventory.Service.Consumers;
 using Play.Inventory.Service.Entities;
 using Polly;
 using Polly.Timeout;
@@ -20,7 +22,11 @@ builder
     .Services.AddMongo()
     .AddMongoRepository<InventoryItem>("inventoryitems")
     .AddMongoRepository<CatalogItem>("catalogitems")
-    .AddMassTransitWithRabbitMq()
+    .AddMassTransitWithRabbitMq(retryConfigurator =>
+    {
+        retryConfigurator.Interval(3, TimeSpan.FromSeconds(5));
+        retryConfigurator.Ignore(typeof(UnknownItemException)); // will not retry but move on if it fails
+    })
     .AddJwtBearerAuthentication();
 
 builder.Services.AddControllers();

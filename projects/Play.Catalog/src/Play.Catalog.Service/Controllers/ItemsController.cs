@@ -71,7 +71,11 @@ public class ItemsController : ControllerBase
 
 		// Create and publish the message for consumer usage 
 		await itemsRepository.CreateAsync(item);
-		await publishEndPoint.Publish(new CatalogItemCreated(item.Id, item.Name, item.Description));
+		await publishEndPoint.Publish(new CatalogItemCreated(
+			item.Id,
+			item.Name,
+			item.Description,
+			item.Price));
 
 		return CreatedAtAction(nameof(GetByIdAsync), new { id = item.Id }, item);
 	}
@@ -93,7 +97,11 @@ public class ItemsController : ControllerBase
 
         // Create and publish the message for consumer usage
         await itemsRepository.UpdateAsync(existingItem);
-		await publishEndPoint.Publish(new CatalogItemUpdated(existingItem.Id, existingItem.Name, existingItem.Description));
+		await publishEndPoint.Publish(new CatalogItemUpdated(
+			existingItem.Id,
+			existingItem.Name,
+			existingItem.Description,
+			existingItem.Price));
 
 		return NoContent();
 	}
