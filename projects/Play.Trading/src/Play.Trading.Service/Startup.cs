@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using MassTransit;
@@ -17,6 +18,7 @@ using Play.Common.Identity;
 using Play.Common.MassTransit;
 using Play.Common.MongoDB;
 using Play.Common.Settings;
+using Play.Trading.Service.Entities;
 using Play.Trading.Service.StateMachines;
 
 namespace Play.Trading.Service
@@ -35,6 +37,7 @@ namespace Play.Trading.Service
         {
             // Configure Mongo Db Collection and RabbitMQ + Saga
             services.AddMongo()
+                .AddMongoRepository<CatalogItem>("catalogitems")
                 .AddJwtBearerAuthentication();
             AddMassTransit(services);
 
@@ -82,6 +85,7 @@ namespace Play.Trading.Service
             services.AddMassTransit(configure =>
             {
                 configure.UsingPlayEconomoyRabbitMq();
+                configure.AddConsumers(Assembly.GetEntryAssembly());
 
                 // Set up Mongo DB for Saga
                 configure.AddSagaStateMachine<PurchaseStateMachine, PurchaseState>()
