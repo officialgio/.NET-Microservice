@@ -1,4 +1,6 @@
-﻿namespace Play.Catalog.Contracts;
+﻿using System;
+
+namespace Play.Catalog.Contracts;
 
 /// <summary>
 /// This class serves as contracts for only information the separate service consumer needs.

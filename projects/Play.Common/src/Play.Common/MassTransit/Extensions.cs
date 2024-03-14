@@ -7,7 +7,7 @@ using Play.Common.Settings;
 namespace Play.Common.MassTransit;
 
 /// <summary>
-/// This class maintains concrete functionality for the IserviceCollection initialization to keep
+/// This class maintains concrete functionality for the IServiceCollection initialization to keep
 /// everything abstracted and clean within the Program.cs file and initialize any general MassTransmit instances
 /// of services.
 /// </summary>

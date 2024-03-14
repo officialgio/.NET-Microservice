@@ -1,3 +1,4 @@
+using GreenPipes;
 using MassTransit;
 using Play.Common.Identity;
 using Play.Common.MassTransit;

@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Play.Identity.Contracts;
 using Play.Identity.Service.Entities;
 
 namespace Play.Identity.Service.Consumers;
-using static Play.Identity.Contracts;
 
 public class DebitGilConsumer : IConsumer<DebitGil>
 {

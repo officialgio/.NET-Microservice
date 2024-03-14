@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using MassTransit;
 using Play.Common;
+using Play.Inventory.Contracts;
 using Play.Inventory.Service.Entities;
 using static Play.Inventory.Service.Dtos;
-using static Play.Inventory.Contracts;
 
 namespace Play.Inventory.Service.Consumers;
 
@@ -20,10 +20,10 @@ public class GrantItemsConsumer : IConsumer<GrantItems>
     private readonly IRepository<CatalogItem> catalogItemsRepository;
 
     public GrantItemsConsumer(IRepository<InventoryItem> inventoryItemsRepository, IRepository<CatalogItem> catalogItemsRepository)
-	{
+    {
         this.inventoryItemsRepository = inventoryItemsRepository;
         this.catalogItemsRepository = catalogItemsRepository;
-	}
+    }
 
     // First, check if the item exist, if so, get the item and assign it to a user.
     public async Task Consume(ConsumeContext<GrantItems> context)

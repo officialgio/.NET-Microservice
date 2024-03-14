@@ -9,7 +9,7 @@ using Play.Common.Settings;
 namespace Play.Common.MongoDB;
 
 /// <summary>
-/// This class maintains concrete functionality for the IserviceCollection initialization to keep
+/// This class maintains concrete functionality for the IServiceCollection initialization to keep
 /// everything abstracted and clean within the Program.cs file and initialize any general Mongo instances
 /// of services.
 /// </summary>
@@ -28,7 +28,7 @@ public static class Extensions
         // Construct the MongoDB Client
         services.AddSingleton(serviceProvider =>
         {
-            // Get configuration service from insfrastructure
+            // Get configuration service from infrastructure
             var configuration = serviceProvider.GetService<IConfiguration>();
 
             // Bindings

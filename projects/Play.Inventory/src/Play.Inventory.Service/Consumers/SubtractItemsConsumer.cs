@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using MassTransit;
 using Play.Common;
+using Play.Inventory.Contracts;
 using Play.Inventory.Service.Entities;
 using static Play.Inventory.Service.Dtos;
-using static Play.Inventory.Contracts;
 
 namespace Play.Inventory.Service.Consumers;
 
@@ -20,10 +20,10 @@ public class SubtractItemsConsumer : IConsumer<SubtractItems>
     private readonly IRepository<CatalogItem> catalogItemsRepository;
 
     public SubtractItemsConsumer(IRepository<InventoryItem> inventoryItemsRepository, IRepository<CatalogItem> catalogItemsRepository)
-	{
+    {
         this.inventoryItemsRepository = inventoryItemsRepository;
         this.catalogItemsRepository = catalogItemsRepository;
-	}
+    }
 
     // First, check if the item exists in the db, if so, grab the item and ubstract the quantity that was requested initially.
     public async Task Consume(ConsumeContext<SubtractItems> context)
