@@ -74,14 +74,14 @@ namespace Play.Trading.Service
             // NOTE: This version is different from the Common lib b/c we're using Saga.
             services.AddMassTransit(configure =>
             {
-                configure.UsingPlayEconomoyRabbitMq();
+                configure.UsingPlayEconomyRabbitMq();
 
                 // Set up Mongo DB for Saga
                 configure.AddSagaStateMachine<PurchaseStateMachine, PurchaseState>()
                 .MongoDbRepository(r =>
                 {
                     var serviceSettings = Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
-                    var mongoSettings = Configuration.GetSection(nameof(MongoDBSettings)).Get<MongoDBSettings>();
+                    var mongoSettings = Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
 
                     r.Connection = mongoSettings.ConnectionString;
                     r.DatabaseName = serviceSettings.ServiceName;
