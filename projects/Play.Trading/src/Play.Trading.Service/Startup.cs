@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
@@ -38,7 +39,13 @@ namespace Play.Trading.Service
             AddMassTransit(services);
 
 
-            services.AddControllers();
+            services.AddControllers(options =>
+            {
+                // Avoid transforming Async suffix methods (IMPORTANT)
+                options.SuppressAsyncSuffixInActionNames = false;
+            })
+            .AddJsonOptions(options => options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Play.Trading.Service", Version = "v1" });
@@ -74,14 +81,14 @@ namespace Play.Trading.Service
             // NOTE: This version is different from the Common lib b/c we're using Saga.
             services.AddMassTransit(configure =>
             {
-                configure.UsingPlayEconomyRabbitMq();
+                configure.UsingPlayEconomoyRabbitMq();
 
                 // Set up Mongo DB for Saga
                 configure.AddSagaStateMachine<PurchaseStateMachine, PurchaseState>()
                 .MongoDbRepository(r =>
                 {
                     var serviceSettings = Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
-                    var mongoSettings = Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
+                    var mongoSettings = Configuration.GetSection(nameof(MongoDBSettings)).Get<MongoDBSettings>();
 
                     r.Connection = mongoSettings.ConnectionString;
                     r.DatabaseName = serviceSettings.ServiceName;
@@ -89,6 +96,7 @@ namespace Play.Trading.Service
             });
 
             services.AddMassTransitHostedService();
+            services.AddGenericRequestClient(); // Register Request Clients
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Play.Common;
+﻿using System;
+
+namespace Play.Common;
 
 /// <summary>
 /// For generic Models usage

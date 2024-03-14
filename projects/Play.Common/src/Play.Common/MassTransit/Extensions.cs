@@ -1,5 +1,10 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using GreenPipes;
+using GreenPipes.Configurators;
 using MassTransit;
+using MassTransit.Definition;
+using MassTransit.ExtensionsDependencyInjectionIntegration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Play.Common.Settings;
