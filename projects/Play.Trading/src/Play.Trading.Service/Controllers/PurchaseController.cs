@@ -28,12 +28,14 @@ public class PurchaseController : ControllerBase
 		this.purchaseClient = purchaseClient;
 	}
 
+	/// <see cref="PurchaseStateMachine.ConfigureAny"/> when receiving GetPurchaseState. 
 	[HttpGet("status/{correlationId}")]
 	public async Task<ActionResult<PurchaseDto>> GetStatusAsync(Guid correlationId)
 	{
 		var response = await purchaseClient.GetResponse<PurchaseState>(new GetPurchaseState(correlationId));
 		var purchaseState = response.Message;
 
+		// This will be returned only in this service.
 		var purchase = new PurchaseDto(
 			purchaseState.UserId,
 			purchaseState.ItemId,
@@ -48,12 +50,15 @@ public class PurchaseController : ControllerBase
 		return Ok(purchase);
 	}
 
+
+	/// <see cref="PurchaseStateMachine.ConfigureInitialState"/> when receiving PurchaseRequested.
 	[HttpPost]
 	public async Task<IActionResult> PostAsync(SubmitPurchaseDto purchase)
 	{
 		var userId = User.FindFirst("sub").Value; // Identity Service Provider
 		var correlationId = Guid.NewGuid();
 
+		// This will be publish for other services.
 		var message = new PurchaseRequested(
 			Guid.Parse(userId),
 			purchase.ItemId.Value,

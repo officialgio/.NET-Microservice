@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Play.Trading.Service;
 
 /// <summary>
-/// Record that describes the POST request
+/// Record that describes the POST request for a Purchase.
 /// </summary>
 public record SubmitPurchaseDto(
     [Required] Guid? ItemId,
@@ -12,7 +12,7 @@ public record SubmitPurchaseDto(
 );
 
 /// <summary>
-/// Record that describes the GET request
+/// Record that describes the GET request for the Purchase.
 /// </summary>
 public record PurchaseDto(
     Guid UserId,

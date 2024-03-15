@@ -1,5 +1,6 @@
 ﻿using System;
 using Automatonymous;
+using Play.Inventory.Contracts;
 using Play.Trading.Service.Activities;
 
 namespace Play.Trading.Service.StateMachines;
@@ -18,6 +19,8 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 
 	public Event<GetPurchaseState> GetPurchaseState { get; }
 
+	public Event<InventoryItemsGranted> InventoryItemsGranted { get; }
+
 	public PurchaseStateMachine()
 	{
 		// Track the state
@@ -25,6 +28,7 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 		ConfigureEvents();
 		ConfigureInitialState();
 		ConfigureAny();
+		ConfigureAccepted();
 	}
 
 	// MassTransit will make use of any necessary events in this method.
@@ -32,6 +36,7 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 	{
 		Event(() => PurchaseRequested);
 		Event(() => GetPurchaseState);
+		Event(() => InventoryItemsGranted);
 	}
 
 	private void ConfigureInitialState()
@@ -49,7 +54,12 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 					context.Instance.LastUpdated = DateTimeOffset.Now;
 				})
 				.Activity(x => x.OfType<CalculatePurchaseTotalActivity>()) // 2. Perform the calculation
-				.TransitionTo(Accepted) // 3. Happy Case!
+				.Send(context => new GrantItems( // 3. Send the GrantItems request to Inventory microservice
+					context.Instance.UserId,
+					context.Instance.ItemId,
+					context.Instance.Quantity,
+					context.Instance.CorrelationId))
+				.TransitionTo(Accepted) // 4. Happy Case!
 				.Catch<Exception>(ex => ex
 					.Then(context =>
 					{
@@ -59,6 +69,18 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 					})
 					.TransitionTo(Faulted))
 		);
+	}
+
+	private void ConfigureAccepted()
+	{
+		// During the accepted state, 
+		During(Accepted,
+			When(InventoryItemsGranted)
+				.Then(context =>
+				{
+					context.Instance.LastUpdated = DateTimeOffset.Now;
+				})
+				.TransitionTo(ItemsGranted));
 	}
 
 	private void ConfigureAny()
