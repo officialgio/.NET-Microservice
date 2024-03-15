@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,6 +20,7 @@ using Play.Common.MassTransit;
 using Play.Common.MongoDB;
 using Play.Common.Settings;
 using Play.Trading.Service.Entities;
+using Play.Trading.Service.Exceptions;
 using Play.Trading.Service.StateMachines;
 
 namespace Play.Trading.Service
@@ -84,7 +86,13 @@ namespace Play.Trading.Service
             // NOTE: This version is different from the Common lib b/c we're using Saga.
             services.AddMassTransit(configure =>
             {
-                configure.UsingPlayEconomoyRabbitMq();
+                configure.UsingPlayEconomoyRabbitMq(retryConfigurator =>
+                {
+                    // retry 3 times within a 5 sec time frame.
+                    // If exception is thrown then don't retry.
+                    retryConfigurator.Interval(3, TimeSpan.FromSeconds(5));
+                    retryConfigurator.Ignore(typeof(UnknownItemException));
+                });
                 configure.AddConsumers(Assembly.GetEntryAssembly());
 
                 // Set up Mongo DB for Saga

@@ -1,5 +1,6 @@
 ﻿using System;
 using Automatonymous;
+using Play.Trading.Service.Activities;
 
 namespace Play.Trading.Service.StateMachines;
 
@@ -37,7 +38,7 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 	{
 		// When receiving a PurchaseRequested event, then we must obtain all of these properties.
 		Initially(
-			When(PurchaseRequested)
+			When(PurchaseRequested) // 1. Obtain the props
 				.Then(context =>
 				{
 					// For clarification, instance = this class instance and Data = Incoming Request (i.e PurchaseRequested)
@@ -47,7 +48,16 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 					context.Instance.Received = DateTimeOffset.Now;
 					context.Instance.LastUpdated = DateTimeOffset.Now;
 				})
-				.TransitionTo(Accepted)
+				.Activity(x => x.OfType<CalculatePurchaseTotalActivity>()) // 2. Perform the calculation
+				.TransitionTo(Accepted) // 3. Happy Case!
+				.Catch<Exception>(ex => ex
+					.Then(context =>
+					{
+						// Store the exception (if any) into the instance state
+						context.Instance.ErrorMessage = context.Exception.Message;
+						context.Instance.LastUpdated = DateTimeOffset.Now;
+					})
+					.TransitionTo(Faulted))
 		);
 	}
 
