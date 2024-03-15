@@ -98,7 +98,10 @@ namespace Play.Trading.Service
                 configure.AddConsumers(Assembly.GetEntryAssembly());
 
                 // Set up Mongo DB for Saga
-                configure.AddSagaStateMachine<PurchaseStateMachine, PurchaseState>()
+                configure.AddSagaStateMachine<PurchaseStateMachine, PurchaseState>(sagaConfigurator =>
+                {
+                    sagaConfigurator.UseInMemoryOutbox();
+                })
                 .MongoDbRepository(r =>
                 {
                     var serviceSettings = Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
