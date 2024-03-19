@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -24,7 +25,7 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     }
 
     // You're able to generalize any microservice for Identity Service configurations. Recall that the audience is the
-    // name of the service, and the autorhity is where the microservices will request to generate access tokens from.
+    // name of the service, and the authority is where the microservices will request to generate access tokens from.
     // Ensure to also include MapInBoundClaims to false to avoid legacy errors conflict with newer external identity providers
     // because they might be using modern claims that this service doesn't use.
     public void Configure(string? name, JwtBearerOptions options)

@@ -19,6 +19,7 @@ using Play.Common.Identity;
 using Play.Common.MassTransit;
 using Play.Common.MongoDB;
 using Play.Common.Settings;
+using Play.Identity.Contracts;
 using Play.Inventory.Contracts;
 using Play.Trading.Service.Entities;
 using Play.Trading.Service.Exceptions;
@@ -88,7 +89,7 @@ namespace Play.Trading.Service
             // NOTE: This version is different from the Common lib b/c we're using Saga.
             services.AddMassTransit(configure =>
             {
-                configure.UsingPlayEconomoyRabbitMq(retryConfigurator =>
+                configure.UsingPlayEconomyRabbitMq(retryConfigurator =>
                 {
                     // retry 3 times within a 5 sec time frame.
                     // If exception is thrown then don't retry.
@@ -105,16 +106,18 @@ namespace Play.Trading.Service
                 .MongoDbRepository(r =>
                 {
                     var serviceSettings = Configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
-                    var mongoSettings = Configuration.GetSection(nameof(MongoDBSettings)).Get<MongoDBSettings>();
+                    var mongoSettings = Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
 
                     r.Connection = mongoSettings.ConnectionString;
                     r.DatabaseName = serviceSettings.ServiceName;
                 });
             });
 
-            // Endpoint configuration to send GrantItems (step 3)
+            // Endpoint configuration to send commands
             var queueSettings = Configuration.GetSection(nameof(QueueSettings)).Get<QueueSettings>();
             EndpointConvention.Map<GrantItems>(new Uri(queueSettings.GrantItemsQueueAddress));
+            EndpointConvention.Map<DebitGil>(new Uri(queueSettings.DebitGilQueueAddress));
+            EndpointConvention.Map<SubtractItems>(new Uri(queueSettings.SubtractItemsQueueAddress));
 
             services.AddMassTransitHostedService();
             services.AddGenericRequestClient(); // Register Request Clients

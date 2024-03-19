@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Play.Common;
-
 public interface IRepository<T> where T : IEntity
 {
     Task CreateAsync(T entity);

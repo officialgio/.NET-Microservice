@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,9 +13,9 @@ public static class Extensions
 {
     // This method chains additional configuration methods to further customize the authentication setup if needed.
     public static AuthenticationBuilder AddJwtBearerAuthentication(this IServiceCollection services)
-	{
-		return services.ConfigureOptions<ConfigureJwtBearerOptions>()
-			.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-			.AddJwtBearer();
-	}
+    {
+        return services.ConfigureOptions<ConfigureJwtBearerOptions>()
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer();
+    }
 }

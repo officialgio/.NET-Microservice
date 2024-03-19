@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using GreenPipes;
 using GreenPipes.Configurators;
@@ -27,8 +27,10 @@ public static class Extensions
         {
             // Any consumer classes that are in the assembly will be the a consumer
             configure.AddConsumers(Assembly.GetEntryAssembly());
-            configure.UsingPlayEconomoyRabbitMq(configureRetries);
+            configure.UsingPlayEconomyRabbitMq(configureRetries);
         });
+
+        services.AddMassTransitHostedService();
 
         return services;
     }
@@ -36,7 +38,7 @@ public static class Extensions
     /// <summary>
     /// This is used to register the RabbitMq configurations such as apply a Host and Endpoints, along with an optional retry handler.
     /// </summary>
-    public static void UsingPlayEconomoyRabbitMq(this IBusRegistrationConfigurator configure, Action<IRetryConfigurator> configureRetries = null)
+    public static void UsingPlayEconomyRabbitMq(this IServiceCollectionBusConfigurator configure, Action<IRetryConfigurator> configureRetries = null)
     {
         configure.UsingRabbitMq((context, configurator) =>
         {
@@ -45,9 +47,9 @@ public static class Extensions
             var serviceSettings = configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
 
             // Register an instance of the RabbitMQ Settings and apply necessary configurations
-            var rabbnitMQSettings = configuration.GetSection(nameof(RabbitMQSettings)).Get<RabbitMQSettings>();
-            configurator.Host(rabbnitMQSettings?.Host);
-            configurator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter(serviceSettings?.ServiceName, false));
+            var rabbitMQSettings = configuration.GetSection(nameof(RabbitMQSettings)).Get<RabbitMQSettings>();
+            configurator.Host(rabbitMQSettings.Host);
+            configurator.ConfigureEndpoints(context, new KebabCaseEndpointNameFormatter(serviceSettings.ServiceName, false));
 
             // Retry 3 times and wait 5 seconds within those retries.
             if (configureRetries is null)

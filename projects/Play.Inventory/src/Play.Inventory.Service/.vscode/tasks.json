@@ -7,15 +7,11 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/src/Play.Common/Play.Common.csproj",
+                "${workspaceFolder}/Play.Inventory.Service.sln",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
-            "problemMatcher": "$msCompile",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "publish",
@@ -23,9 +19,9 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/src/Play.Common/Play.Common.csproj",
+                "${workspaceFolder}/Play.Inventory.Service.sln",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -36,9 +32,8 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/src/Play.Common/Play.Common.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "--project",
+                "${workspaceFolder}/Play.Inventory.Service.sln"
             ],
             "problemMatcher": "$msCompile"
         }

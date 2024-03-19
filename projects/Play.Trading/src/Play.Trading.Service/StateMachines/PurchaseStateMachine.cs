@@ -1,5 +1,7 @@
 ﻿using System;
 using Automatonymous;
+using MassTransit;
+using Play.Identity.Contracts;
 using Play.Inventory.Contracts;
 using Play.Trading.Service.Activities;
 
@@ -21,6 +23,15 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 
 	public Event<InventoryItemsGranted> InventoryItemsGranted { get; }
 
+	public Event<GilDebited> GilDebited { get; }
+
+
+	// Event with other services fails doing the operations (will be used)
+	public Event<Fault<GrantItems>> GrantItemsFaulted { get; }
+
+	public Event<Fault<DebitGil>> DebitGilFaulted { get; }
+
+
 	public PurchaseStateMachine()
 	{
 		// Track the state
@@ -29,6 +40,8 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 		ConfigureInitialState();
 		ConfigureAny();
 		ConfigureAccepted();
+		ConfigureItemsGranted();
+		ConfigureFaulted();
 	}
 
 	// MassTransit will make use of any necessary events in this method.
@@ -37,6 +50,13 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 		Event(() => PurchaseRequested);
 		Event(() => GetPurchaseState);
 		Event(() => InventoryItemsGranted);
+		Event(() => GilDebited);
+
+		// Failure Events
+		Event(() => GrantItemsFaulted,
+			x => x.CorrelateById(context => context.Message.Message.CorrelationId));
+		Event(() => DebitGilFaulted,
+			x => x.CorrelateById(context => context.Message.Message.CorrelationId));
 	}
 
 	private void ConfigureInitialState()
@@ -80,7 +100,45 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 				{
 					context.Instance.LastUpdated = DateTimeOffset.Now;
 				})
-				.TransitionTo(ItemsGranted));
+				.Send(context => new DebitGil( // Send to Identity service
+					context.Instance.UserId,
+					context.Instance.PurchaseTotal,
+					context.Instance.CorrelationId
+				))
+				.TransitionTo(ItemsGranted),
+			When(GrantItemsFaulted) // This section is for when things fail in some other service
+				.Then(context =>
+				{
+					context.Instance.ErrorMessage = context.Data.Exceptions[0].Message;
+					context.Instance.LastUpdated = DateTimeOffset.Now;
+				})
+				.TransitionTo(Faulted)
+			);
+	}
+
+	private void ConfigureItemsGranted()
+	{
+		During(ItemsGranted,
+			When(GilDebited) // Identity sends this event back
+				.Then(context =>
+				{
+					context.Instance.LastUpdated = DateTimeOffset.Now;
+				})
+				.TransitionTo(Completed), // Once Identity sends GilDebit successfully = Done!
+			When(DebitGilFaulted) // If something goes wrong, we must revert/tell the service to subtract
+				.Send(context => new SubtractItems(
+					context.Instance.UserId,
+					context.Instance.ItemId,
+					context.Instance.Quantity,
+					context.Instance.CorrelationId
+				))
+				.Then(context =>
+				{
+					context.Instance.ErrorMessage = context.Data.Exceptions[0].Message;
+					context.Instance.LastUpdated = DateTimeOffset.Now;
+				})
+				.TransitionTo(Faulted)
+		);
 	}
 
 	private void ConfigureAny()
@@ -88,6 +146,16 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 		DuringAny(
 			When(GetPurchaseState)
 				.Respond(x => x.Instance)
+		);
+	}
+
+	private void ConfigureFaulted()
+	{
+		// If there's an error, ignore any of these events
+		During(Faulted,
+			Ignore(PurchaseRequested),
+			Ignore(InventoryItemsGranted),
+			Ignore(GilDebited)
 		);
 	}
 }

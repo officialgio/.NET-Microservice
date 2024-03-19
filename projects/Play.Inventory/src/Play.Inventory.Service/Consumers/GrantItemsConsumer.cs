@@ -10,12 +10,12 @@ namespace Play.Inventory.Service.Consumers;
 public class GrantItemsConsumer : IConsumer<GrantItems>
 {
     /// <summary>
-    /// This is a referenece to the MongoDatabase Collection
+    /// This is a reference to the MongoDatabase Collection (inventoryitems)
     /// </summary>
     private readonly IRepository<InventoryItem> inventoryItemsRepository;
 
     /// <summary>
-    /// This is a referenece to the MongoDatabase Collection
+    /// This is a reference to the MongoDatabase Collection (catalogitems)
     /// </summary>
     private readonly IRepository<CatalogItem> catalogItemsRepository;
 

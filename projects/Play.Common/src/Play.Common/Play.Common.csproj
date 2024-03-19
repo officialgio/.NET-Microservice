@@ -14,10 +14,4 @@
     <PackageReference Include="MongoDB.Driver" Version="2.22.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Identity\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Identity\" />
-  </ItemGroup>
 </Project>
