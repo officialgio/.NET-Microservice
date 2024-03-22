@@ -42,6 +42,7 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 		ConfigureAccepted();
 		ConfigureItemsGranted();
 		ConfigureFaulted();
+		ConfigureCompleted();
 	}
 
 	// MassTransit will make use of any necessary events in this method.
@@ -95,6 +96,7 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 	{
 		// During the accepted state, 
 		During(Accepted,
+			Ignore(PurchaseRequested), // Already moved forward, no need to accept this request
 			When(InventoryItemsGranted) // Inventory sends this back
 				.Then(context =>
 				{
@@ -119,6 +121,8 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 	private void ConfigureItemsGranted()
 	{
 		During(ItemsGranted,
+			Ignore(PurchaseRequested), // Already moved forward, no need to accept this request
+			Ignore(InventoryItemsGranted), // Already moved forward, no need to accept this request
 			When(GilDebited) // Identity sends this event back
 				.Then(context =>
 				{
@@ -138,6 +142,16 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 					context.Instance.LastUpdated = DateTimeOffset.Now;
 				})
 				.TransitionTo(Faulted)
+		);
+	}
+
+	private void ConfigureCompleted()
+	{
+		// Already Completed Ignore any other request.
+		During(Completed,
+			Ignore(PurchaseRequested),
+			Ignore(InventoryItemsGranted),
+			Ignore(GilDebited)
 		);
 	}
 
