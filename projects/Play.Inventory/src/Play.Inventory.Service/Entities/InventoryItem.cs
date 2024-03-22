@@ -33,4 +33,9 @@ public class InventoryItem : IEntity
     /// Date of purchased.
     /// </summary>
     public DateTimeOffset AcquiredDate { get; set; }
+
+    /// <summary>
+    /// Represents unique identifiers for the messages being consumed
+    /// </summary>
+    public HashSet<Guid> MessageIds { get; set; } = new();
 }

@@ -45,8 +45,19 @@ public class SubtractItemsConsumer : IConsumer<SubtractItems>
 
         if (inventoryItem is not null)
         {
+            // Avoid duplicate messages
+            if (inventoryItem.MessageIds.Contains(context.MessageId.Value))
+            {
+                await context.Publish(new InventoryItemsSubtracted(message.CorrelationId));
+                return;
+            }
+
             // Undo the quantity that was requested
             inventoryItem.Quantity -= message.Quantity;
+
+            // attach the MessageId from the message header to check for duplicate messages
+            inventoryItem.MessageIds.Add(context.MessageId.Value);
+
             await inventoryItemsRepository.UpdateAsync(inventoryItem);
         }
 

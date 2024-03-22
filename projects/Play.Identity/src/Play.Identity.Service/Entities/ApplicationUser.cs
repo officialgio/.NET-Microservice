@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AspNetCore.Identity.MongoDbCore.Models;
 using MongoDbGenericRepository.Attributes;
 
@@ -11,4 +12,9 @@ public class ApplicationUser : MongoIdentityUser<Guid>
     /// Amount of Gil of the user.
     /// </summary>
     public decimal Gil { get; set; }
+
+    /// <summary>
+    /// Represents unique identifiers for the messages being consumed
+    /// </summary>
+    public HashSet<Guid> MessageIds { get; set; } = new();
 }
