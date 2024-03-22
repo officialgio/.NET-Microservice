@@ -3,7 +3,7 @@
 namespace Play.Trading.Service;
 
 /// <summary>
-/// This record will only be used within this service.
+/// These records will only be used within Trading service.
 /// </summary>
 public record PurchaseRequested(
     Guid UserId,

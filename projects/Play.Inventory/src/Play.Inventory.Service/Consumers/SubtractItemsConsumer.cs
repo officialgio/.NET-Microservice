@@ -25,7 +25,7 @@ public class SubtractItemsConsumer : IConsumer<SubtractItems>
         this.catalogItemsRepository = catalogItemsRepository;
     }
 
-    // First, check if the item exists in the db, if so, grab the item and ubstract the quantity that was requested initially.
+    // First, check if the item exists in the db, if so, grab the item and subtract the quantity that was requested initially.
     public async Task Consume(ConsumeContext<SubtractItems> context)
     {
         var message = context.Message;
@@ -37,8 +37,7 @@ public class SubtractItemsConsumer : IConsumer<SubtractItems>
             throw new UnknownItemException(message.CatalogItemId);
         }
 
-        // Check if it exist, if it it's null create a new InventoryItem
-        // Otherwise, increment the item and update it.
+        // Check the item exists and subtract the quantity that was requested
         Expression<Func<InventoryItem, bool>> filter =
             item => item.UserId == message.UserId && item.CatalogItemId == message.CatalogItemId;
 
@@ -46,6 +45,7 @@ public class SubtractItemsConsumer : IConsumer<SubtractItems>
 
         if (inventoryItem is not null)
         {
+            // Undo the quantity that was requested
             inventoryItem.Quantity -= message.Quantity;
             await inventoryItemsRepository.UpdateAsync(inventoryItem);
         }

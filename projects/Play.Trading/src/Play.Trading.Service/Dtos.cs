@@ -8,7 +8,8 @@ namespace Play.Trading.Service;
 /// </summary>
 public record SubmitPurchaseDto(
     [Required] Guid? ItemId,
-    [Range(1, 100)] int Quantity
+    [Range(1, 100)] int Quantity,
+    [Required] Guid? IdempotencyId
 );
 
 /// <summary>

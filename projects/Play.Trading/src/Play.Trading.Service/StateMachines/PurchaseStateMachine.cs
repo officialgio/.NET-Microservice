@@ -95,7 +95,7 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 	{
 		// During the accepted state, 
 		During(Accepted,
-			When(InventoryItemsGranted)
+			When(InventoryItemsGranted) // Inventory sends this back
 				.Then(context =>
 				{
 					context.Instance.LastUpdated = DateTimeOffset.Now;
@@ -126,7 +126,7 @@ public class PurchaseStateMachine : MassTransitStateMachine<PurchaseState>
 				})
 				.TransitionTo(Completed), // Once Identity sends GilDebit successfully = Done!
 			When(DebitGilFaulted) // If something goes wrong, we must revert/tell the service to subtract
-				.Send(context => new SubtractItems(
+				.Send(context => new SubtractItems( // Inventory will handle this
 					context.Instance.UserId,
 					context.Instance.ItemId,
 					context.Instance.Quantity,
