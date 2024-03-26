@@ -3,6 +3,9 @@ using Play.Common;
 
 namespace Play.Trading.Service.Entities;
 
+/// <summary>
+/// Model for the Trading Service Db
+/// </summary>
 public class CatalogItem : IEntity
 {
     /// <summary>
