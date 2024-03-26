@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
+using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Play.Common;
@@ -16,26 +17,33 @@ public class ItemsController : ControllerBase
 {
 	private const string AdminRole = "Admin";
 
-    /// <summary>
-    /// This is a referenece to the MongoDatabase Collection
-    /// </summary>
-    private readonly IRepository<InventoryItem> inventoryItemsRepository;
+	/// <summary>
+	/// This is a referenece to the MongoDatabase Collection
+	/// </summary>
+	private readonly IRepository<InventoryItem> inventoryItemsRepository;
 
-    /// <summary>
-    /// This is a referenece to the MongoDatabase Collection
-    /// </summary>
-    private readonly IRepository<CatalogItem> catalogItemsRepository;
+	/// <summary>
+	/// This is a referenece to the MongoDatabase Collection
+	/// </summary>
+	private readonly IRepository<CatalogItem> catalogItemsRepository;
 
-    /// <summary>
-    /// Reference to talk to the Catalog Microservice (not used anymore)
+	private readonly IPublishEndpoint publishEndpoint;
+
+
+	/// <summary>
+	/// Reference to talk to the Catalog Microservice (not used anymore)
 	/// Migrated to RabbitMQ
-    /// </summary>
-    private readonly CatalogClient catalogClient;
+	/// </summary>
+	private readonly CatalogClient catalogClient;
 
-	public ItemsController(IRepository<InventoryItem> inventoryItemsRepository, IRepository<CatalogItem> catalogItemsRepository)
+	public ItemsController(
+		IRepository<InventoryItem> inventoryItemsRepository,
+		IRepository<CatalogItem> catalogItemsRepository,
+		IPublishEndpoint publishEndpoint)
 	{
 		this.inventoryItemsRepository = inventoryItemsRepository;
 		this.catalogItemsRepository = catalogItemsRepository;
+		this.publishEndpoint = publishEndpoint;
 	}
 
 	[HttpGet]
@@ -49,7 +57,7 @@ public class ItemsController : ControllerBase
 
 		// Retrieve the sub claim for this user (userId)
 		var currentUserId = User.FindFirst(JwtRegisteredClaimNames.Sub).Value;
-		
+
 		// If the currentUser who is calling this api is not the matched user in db
 		// and check if its role is not admin then they're not authorized to call this endpoint.
 		if (Guid.Parse(currentUserId) != userId)
@@ -79,7 +87,7 @@ public class ItemsController : ControllerBase
 			return inventoryItem.AsDto(catalogItem.Name, catalogItem.Description);
 		});
 
-		return Ok(inventoryItemDtos); 
+		return Ok(inventoryItemDtos);
 	}
 
 	[HttpPost]
@@ -110,6 +118,12 @@ public class ItemsController : ControllerBase
 			inventoryItem.Quantity += grantItemsDto.Quantity;
 			await inventoryItemsRepository.UpdateAsync(inventoryItem);
 		}
+
+		// for anyone who will grant items manually we should still publish this.
+		await publishEndpoint.Publish(new InventoryItemUpdated(
+			inventoryItem.UserId, inventoryItem.CatalogItemId, inventoryItem.Quantity
+		));
+
 		return Ok();
 	}
 }

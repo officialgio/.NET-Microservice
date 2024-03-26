@@ -31,3 +31,8 @@ public record SubtractItems(
 /// </summary>
 public record InventoryItemsSubtracted(Guid CorrelationId);
 
+/// <summary>
+/// Event when the Inventory Item has been updated for a User.
+/// </summary>
+public record InventoryItemUpdated(Guid UserId, Guid CatalogItemId, int NewTotalQuantity);
+
