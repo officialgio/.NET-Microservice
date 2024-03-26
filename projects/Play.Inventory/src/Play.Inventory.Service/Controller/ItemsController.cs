@@ -5,6 +5,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Play.Common;
+using Play.Inventory.Contracts;
 using Play.Inventory.Service.Clients;
 using Play.Inventory.Service.Entities;
 using static Play.Inventory.Service.Dtos;
