@@ -12,3 +12,8 @@ public record DebitGil(
 /// Event response for debitted gil.
 /// </summary>
 public record GilDebited(Guid CorrelationId);
+
+/// <summary>
+/// Event for when the User has been updated.
+/// </summary>
+public record UserUpdated(Guid UserId, string email, decimal NewTotalGil);

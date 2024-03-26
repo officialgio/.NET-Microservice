@@ -45,6 +45,9 @@ public class DebitGilConsumer : IConsumer<DebitGil>
 
         await userManager.UpdateAsync(user);
 
-        await context.Publish(new GilDebited(message.CorrelationId));
+        var gilDebitedTask = context.Publish(new GilDebited(message.CorrelationId));
+        var userUpdatedTask = context.Publish(new UserUpdated(user.Id, user.Email, user.Gil));
+
+        await Task.WhenAll(userUpdatedTask, gilDebitedTask);
     }
 }
